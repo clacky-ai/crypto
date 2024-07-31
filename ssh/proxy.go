@@ -42,7 +42,8 @@ type ProxyConfig struct {
 }
 
 type ProxyConn struct {
-	User            string
+	UpUser          string
+	DownUser        string
 	DestinationHost string
 	Upstream        *connection
 	Downstream      *connection
@@ -83,7 +84,7 @@ func (p *ProxyConn) handleAuthMsg(msg *userAuthRequestMsg, proxyConf *ProxyConfi
 			break
 		}
 
-		privateBytes, err := fetchPrivateKey(proxyConf, p.User)
+		privateBytes, err := fetchPrivateKey(proxyConf, p.UpUser)
 		if err != nil {
 			break
 		}
@@ -105,7 +106,7 @@ func (p *ProxyConn) handleAuthMsg(msg *userAuthRequestMsg, proxyConf *ProxyConfi
 		}
 
 		for _, signer := range signers {
-			msg, err = p.signAgain(username, msg, signer)
+			msg, err = p.signAgain(p.UpUser, msg, signer)
 			if err == nil {
 				return msg, nil
 			}
