@@ -550,14 +550,12 @@ func (c *connection) GetAuthRequestMsg() (*userAuthRequestMsg, error) {
 	}
 
 	// User is combined by {username}#{upstreamHost}
-	user := userAuthReq.User
+	c.user = userAuthReq.User
 	isContain := strings.Contains(userAuthReq.User, "#")
 	if isContain {
 		splitArray := strings.Split(userAuthReq.User, "#")
 		c.user = splitArray[0]
 	}
-
-	c.user = user
 
 	return &userAuthReq, nil
 }
