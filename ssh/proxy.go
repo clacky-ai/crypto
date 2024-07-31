@@ -12,7 +12,6 @@ import (
 	"net"
 	"os"
 	"path"
-	"strings"
 )
 
 type userFile string
@@ -68,25 +67,20 @@ func (p *ProxyConn) handleAuthMsg(msg *userAuthRequestMsg, proxyConf *ProxyConfi
 			return nil, nil
 		}
 
-		fmt.Printf("downStreamPublicKey get Success")
-
-		authKeys, err := proxyConf.FetchAuthorizedKeysHook(p.DownUser, p.DestinationHost)
+		authKeys, err := proxyConf.FetchAuthorizedKeysHook(p.UpUser, p.DestinationHost)
 		if err != nil {
-			return noneAuthMsg(p.DownUser), nil
+			return noneAuthMsg(p.UpUser), nil
 		}
 
 		ok, err := checkPublicKeyRegistration(authKeys, downStreamPublicKey)
 		if err != nil || !ok {
-			return noneAuthMsg(p.DownUser), nil
+			return noneAuthMsg(p.UpUser), nil
 		}
 
 		ok, err = p.VerifySignature(msg, downStreamPublicKey, algo, sig)
 		if err != nil || !ok {
 			break
 		}
-
-		fmt.Printf("upStreamPublicKey start")
-		msg.User = p.UpUser
 
 		privateBytes, err := fetchPrivateKey(proxyConf, p.UpUser)
 		if err != nil {
@@ -556,12 +550,6 @@ func (c *connection) GetAuthRequestMsg() (*userAuthRequestMsg, error) {
 
 	// User is combined by {username}#{upstreamHost}
 	c.user = userAuthReq.User
-	isContain := strings.Contains(userAuthReq.User, "#")
-	if isContain {
-		splitArray := strings.Split(userAuthReq.User, "#")
-		c.user = splitArray[0]
-	}
-
 	return &userAuthReq, nil
 }
 
