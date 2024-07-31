@@ -50,7 +50,6 @@ type ProxyConn struct {
 }
 
 func (p *ProxyConn) handleAuthMsg(msg *userAuthRequestMsg, proxyConf *ProxyConfig) (*userAuthRequestMsg, error) {
-	username := msg.User
 	switch msg.Method {
 	case "publickey":
 		if proxyConf.FetchAuthorizedKeysHook == nil {
@@ -69,20 +68,25 @@ func (p *ProxyConn) handleAuthMsg(msg *userAuthRequestMsg, proxyConf *ProxyConfi
 			return nil, nil
 		}
 
-		authKeys, err := proxyConf.FetchAuthorizedKeysHook(username, p.DestinationHost)
+		fmt.Printf("downStreamPublicKey get Success")
+
+		authKeys, err := proxyConf.FetchAuthorizedKeysHook(p.DownUser, p.DestinationHost)
 		if err != nil {
-			return noneAuthMsg(username), nil
+			return noneAuthMsg(p.DownUser), nil
 		}
 
 		ok, err := checkPublicKeyRegistration(authKeys, downStreamPublicKey)
 		if err != nil || !ok {
-			return noneAuthMsg(username), nil
+			return noneAuthMsg(p.DownUser), nil
 		}
 
 		ok, err = p.VerifySignature(msg, downStreamPublicKey, algo, sig)
 		if err != nil || !ok {
 			break
 		}
+
+		fmt.Printf("upStreamPublicKey start")
+		msg.User = p.UpUser
 
 		privateBytes, err := fetchPrivateKey(proxyConf, p.UpUser)
 		if err != nil {
