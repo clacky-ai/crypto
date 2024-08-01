@@ -67,7 +67,7 @@ func (p *ProxyConn) handleAuthMsg(msg *userAuthRequestMsg, proxyConf *ProxyConfi
 			return nil, nil
 		}
 
-		authKeys, err := proxyConf.FetchAuthorizedKeysHook(p.UpUser, p.DestinationHost)
+		authKeys, err := proxyConf.FetchAuthorizedKeysHook(p.DownUser, p.DestinationHost)
 		if err != nil {
 			return noneAuthMsg(p.UpUser), nil
 		}
