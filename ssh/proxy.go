@@ -69,12 +69,12 @@ func (p *ProxyConn) handleAuthMsg(msg *userAuthRequestMsg, proxyConf *ProxyConfi
 
 		authKeys, err := proxyConf.FetchAuthorizedKeysHook(p.DownUser, p.DestinationHost)
 		if err != nil {
-			return noneAuthMsg(p.UpUser), nil
+			return noneAuthMsg(p.DownUser), nil
 		}
 
 		ok, err := checkPublicKeyRegistration(authKeys, downStreamPublicKey)
 		if err != nil || !ok {
-			return noneAuthMsg(p.UpUser), nil
+			return noneAuthMsg(p.DownUser), nil
 		}
 
 		ok, err = p.VerifySignature(msg, downStreamPublicKey, algo, sig)
