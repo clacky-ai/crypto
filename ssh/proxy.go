@@ -82,6 +82,7 @@ func (p *ProxyConn) handleAuthMsg(msg *userAuthRequestMsg, proxyConf *ProxyConfi
 			break
 		}
 
+		msg.User = p.UpUser
 		privateBytes, err := fetchPrivateKey(proxyConf, p.UpUser)
 		if err != nil {
 			break
@@ -346,12 +347,14 @@ func (p *ProxyConn) AuthenticateProxyConn(initUserAuthMsg *userAuthRequestMsg, p
 
 	userAuthMsg := initUserAuthMsg
 	for {
+		userAuthMsg.User = p.DownUser
 		userAuthMsg, err = p.handleAuthMsg(userAuthMsg, proxyConf)
 		if err != nil {
 			fmt.Println(err)
 		}
 
 		if userAuthMsg != nil {
+			userAuthMsg.User = p.UpUser
 			isSuccess, err := p.checkBridgeAuthWithNoBanner(Marshal(userAuthMsg))
 			if err != nil {
 				return err
